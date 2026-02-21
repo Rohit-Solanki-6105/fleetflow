@@ -153,8 +153,8 @@ export default function LoginPage() {
                             <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                                 <Lock className="h-5 w-5 text-blue-500 group-hover:text-blue-400" aria-hidden="true" />
                             </span>
-                            Sign in securely
-                            <ArrowRight className="ml-2 h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                            {isLoading ? 'Signing in...' : 'Sign in securely'}
+                            {!isLoading && <ArrowRight className="ml-2 h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />}
                         </button>
                     </div>
                 </form>

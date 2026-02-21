@@ -1,13 +1,72 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
     Truck,
     Map,
     AlertOctagon,
     TrendingUp,
     Activity,
-    Wrench
+    Wrench,
+    Loader2
 } from 'lucide-react';
+import { analyticsApi } from '@/lib/api/analytics';
+
+interface DashboardStats {
+    total_vehicles: number;
+    available_vehicles: number;
+    on_trip_vehicles: number;
+    in_shop_vehicles: number;
+    total_drivers: number;
+    available_drivers: number;
+    active_trips: number;
+    pending_trips: number;
+    completed_trips_today: number;
+    total_distance_today: number;
+    fleet_utilization_rate: number;
+}
 
 export default function CommandCenterPage() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchDashboard = async () => {
+            try {
+                setLoading(true);
+                const data = await analyticsApi.getDashboard();
+                setStats(data);
+            } catch (err: any) {
+                setError(err.message || 'Failed to load dashboard data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboard();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+        );
+    }
+
+    if (error || !stats) {
+        return (
+            <div className="max-w-7xl mx-auto">
+                <div className="rounded-md bg-red-50 dark:bg-red-900/10 p-4">
+                    <p className="text-sm text-red-800 dark:text-red-400">
+                        {error || 'Failed to load dashboard data'}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
             <div>
@@ -24,32 +83,35 @@ export default function CommandCenterPage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Active Fleet</p>
-                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">42</p>
+                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                {stats.available_vehicles + stats.on_trip_vehicles}
+                            </p>
                         </div>
                         <div className="rounded-md bg-blue-100 dark:bg-blue-900/30 p-2">
                             <Truck className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                         </div>
                     </div>
-                    <p className="mt-2 text-sm text-green-600 dark:text-green-400 flex items-center">
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        <span className="font-medium">+4%</span>
-                        <span className="ml-2 text-gray-500">from yesterday</span>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <span className="font-medium">{stats.on_trip_vehicles} on trip</span>
+                        <span className="ml-2">{stats.available_vehicles} available</span>
                     </p>
                 </div>
 
-                {/* Pending Cargo */}
+                {/* Active Trips */}
                 <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-950 px-4 py-5 shadow-sm sm:p-6 border border-gray-100 dark:border-gray-800">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Pending Cargo</p>
-                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">1,240 <span className="text-lg text-gray-500">tons</span></p>
+                            <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Active Trips</p>
+                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                {stats.active_trips}
+                            </p>
                         </div>
                         <div className="rounded-md bg-indigo-100 dark:bg-indigo-900/30 p-2">
                             <Map className="h-5 w-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
                         </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        Across 14 regions
+                        {stats.pending_trips} pending dispatch
                     </p>
                 </div>
 
@@ -58,7 +120,9 @@ export default function CommandCenterPage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">In Shop</p>
-                            <p className="mt-1 text-3xl font-semibold tracking-tight text-red-600 dark:text-red-500">3</p>
+                            <p className="mt-1 text-3xl font-semibold tracking-tight text-red-600 dark:text-red-500">
+                                {stats.in_shop_vehicles}
+                            </p>
                         </div>
                         <div className="rounded-md bg-red-100 dark:bg-red-900/30 p-2">
                             <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />
@@ -74,14 +138,16 @@ export default function CommandCenterPage() {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Utilization Rate</p>
-                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">88%</p>
+                            <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                                {stats.fleet_utilization_rate.toFixed(1)}%
+                            </p>
                         </div>
                         <div className="rounded-md bg-emerald-100 dark:bg-emerald-900/30 p-2">
                             <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                         </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        Optimized
+                        {stats.completed_trips_today} trips completed today
                     </p>
                 </div>
             </div>
