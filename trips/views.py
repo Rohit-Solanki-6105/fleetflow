@@ -49,7 +49,7 @@ class TripViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     @transaction.atomic
-    def dispatch(self, request, pk=None):
+    def dispatch_trip(self, request, pk=None):
         """Dispatch a trip (change status from DRAFT to DISPATCHED)"""
         trip = self.get_object()
         

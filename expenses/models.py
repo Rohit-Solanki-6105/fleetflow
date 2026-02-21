@@ -7,7 +7,7 @@ class FuelExpense(models.Model):
     """Model for fuel expenses"""
     
     # Expense Information
-    expense_id = models.CharField(max_length=20, unique=True, db_index=True)
+    expense_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     vehicle = models.ForeignKey(
         'vehicles.Vehicle',
         on_delete=models.CASCADE,
@@ -92,6 +92,20 @@ class FuelExpense(models.Model):
         return f"{self.expense_id} - {self.vehicle.vehicle_id} - {self.date}"
     
     def save(self, *args, **kwargs):
+        """Auto-generate expense_id if not provided"""
+        if not self.expense_id:
+            # Get the last fuel expense
+            last_expense = FuelExpense.objects.order_by('-id').first()
+            if last_expense and last_expense.expense_id.startswith('FUEL-'):
+                try:
+                    last_number = int(last_expense.expense_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.expense_id = f'FUEL-{new_number:06d}'
+            
         # Auto-calculate total cost
         if self.liters and self.price_per_liter:
             self.total_cost = self.liters * self.price_per_liter
@@ -113,7 +127,7 @@ class OtherExpense(models.Model):
         OTHER = 'OTHER', _('Other')
     
     # Expense Information
-    expense_id = models.CharField(max_length=20, unique=True, db_index=True)
+    expense_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     vehicle = models.ForeignKey(
         'vehicles.Vehicle',
         on_delete=models.CASCADE,
@@ -169,4 +183,20 @@ class OtherExpense(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.expense_id} - {self.vehicle.vehicle_id} - {self.get_expense_type_display()}"
+        return f"{self.expense_id} - {self.vehicle.vehicle_id} - {self.expense_type}"
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate expense_id if not provided"""
+        if not self.expense_id:
+            # Get the last other expense
+            last_expense = OtherExpense.objects.order_by('-id').first()
+            if last_expense and last_expense.expense_id.startswith('EXP-'):
+                try:
+                    last_number = int(last_expense.expense_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.expense_id = f'EXP-{new_number:06d}'
+        super().save(*args, **kwargs)

@@ -34,7 +34,7 @@ export const driverApi = {
   // Get all drivers
   async getAll(params?: Record<string, any>) {
     const response = await apiClient.get('/drivers/', { params });
-    return response.data;
+    return response.data.results || response.data;
   },
 
   // Get driver by ID

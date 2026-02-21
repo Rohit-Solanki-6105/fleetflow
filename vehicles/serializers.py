@@ -48,6 +48,7 @@ class VehicleCreateUpdateSerializer(serializers.ModelSerializer):
             'current_odometer_km', 'status', 'acquisition_cost', 'acquisition_date',
             'notes'
         ]
+        read_only_fields = ['vehicle_id']
     
     def validate_status(self, value):
         """Prevent status changes that violate business rules"""

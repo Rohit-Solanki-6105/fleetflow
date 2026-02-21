@@ -16,7 +16,7 @@ class Trip(models.Model):
         CANCELLED = 'CANCELLED', _('Cancelled')
     
     # Trip Identification
-    trip_id = models.CharField(max_length=20, unique=True, db_index=True)
+    trip_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     
     # Assignment
     vehicle = models.ForeignKey(
@@ -154,6 +154,19 @@ class Trip(models.Model):
             raise ValidationError(errors)
     
     def save(self, *args, **kwargs):
+        """Auto-generate trip_id if not provided and validate"""
+        if not self.trip_id:
+            # Get the last trip
+            last_trip = Trip.objects.order_by('-id').first()
+            if last_trip and last_trip.trip_id.startswith('TRP-'):
+                try:
+                    last_number = int(last_trip.trip_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.trip_id = f'TRP-{new_number:06d}'
         self.full_clean()
         super().save(*args, **kwargs)
     

@@ -38,7 +38,7 @@ export const vehicleApi = {
   // Get all vehicles
   async getAll(params?: Record<string, any>) {
     const response = await apiClient.get('/vehicles/', { params });
-    return response.data;
+    return response.data.results || response.data;
   },
 
   // Get vehicle by ID

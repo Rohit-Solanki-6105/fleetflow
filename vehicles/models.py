@@ -19,7 +19,7 @@ class Vehicle(models.Model):
         TRAILER = 'TRAILER', _('Trailer')
     
     # Basic Info
-    vehicle_id = models.CharField(max_length=20, unique=True, db_index=True)
+    vehicle_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     name = models.CharField(max_length=100)
     vehicle_type = models.CharField(max_length=20, choices=VehicleType.choices)
     make = models.CharField(max_length=50)
@@ -99,8 +99,9 @@ class Vehicle(models.Model):
     @property
     def total_maintenance_cost(self):
         """Calculate total maintenance cost from related maintenance records"""
+        from django.db.models import F
         return self.maintenance_records.aggregate(
-            total=models.Sum('cost')
+            total=models.Sum(F('labor_cost') + F('parts_cost'))
         )['total'] or 0
     
     @property
@@ -109,3 +110,19 @@ class Vehicle(models.Model):
         return self.fuel_expenses.aggregate(
             total=models.Sum('total_cost')
         )['total'] or 0
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate vehicle_id if not provided"""
+        if not self.vehicle_id:
+            # Get the last vehicle
+            last_vehicle = Vehicle.objects.order_by('-id').first()
+            if last_vehicle and last_vehicle.vehicle_id.startswith('VEH-'):
+                try:
+                    last_number = int(last_vehicle.vehicle_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.vehicle_id = f'VEH-{new_number:06d}'
+        super().save(*args, **kwargs)

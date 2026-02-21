@@ -37,6 +37,7 @@ class MaintenanceRecordCreateUpdateSerializer(serializers.ModelSerializer):
             'completed_date', 'odometer_reading_km', 'labor_cost',
             'parts_cost', 'status', 'notes', 'attachments'
         ]
+        read_only_fields = ['record_id']
     
     def validate(self, data):
         """Validate maintenance record data"""

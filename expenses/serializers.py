@@ -34,6 +34,7 @@ class FuelExpenseCreateUpdateSerializer(serializers.ModelSerializer):
             'liters', 'price_per_liter', 'fuel_station', 'location',
             'odometer_reading_km', 'receipt_number', 'notes', 'receipt_image'
         ]
+        read_only_fields = ['expense_id']
 
 
 class OtherExpenseSerializer(serializers.ModelSerializer):
@@ -58,6 +59,16 @@ class OtherExpenseSerializer(serializers.ModelSerializer):
 
 class OtherExpenseCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer for creating/updating other expenses"""
+    
+    class Meta:
+        model = OtherExpense
+        fields = [
+            'expense_id', 'vehicle', 'trip', 'expense_type', 'date',
+            'amount', 'description', 'vendor', 'receipt_number',
+            'notes', 'receipt_image'
+        ]
+        read_only_fields = ['expense_id']
+        read_only_fields = ['expense_id']
     
     class Meta:
         model = OtherExpense

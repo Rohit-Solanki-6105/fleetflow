@@ -2,7 +2,7 @@
 import apiClient from './client';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export interface LoginCredentials {
   email: string;
@@ -29,7 +29,7 @@ export interface User {
 export const authApi = {
   // Login
   async login(credentials: LoginCredentials): Promise<AuthTokens> {
-    const response = await axios.post(`${API_BASE_URL}/api/auth/login/`, credentials);
+    const response = await axios.post(`${API_BASE_URL}/auth/login/`, credentials);
     const { access, refresh } = response.data;
     
     // Store tokens
@@ -59,7 +59,7 @@ export const authApi = {
   // Refresh token
   async refreshToken(): Promise<string> {
     const refreshToken = localStorage.getItem('refresh_token');
-    const response = await axios.post(`${API_BASE_URL}/api/auth/refresh/`, {
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
       refresh: refreshToken,
     });
     const { access } = response.data;

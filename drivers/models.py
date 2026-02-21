@@ -14,7 +14,7 @@ class Driver(models.Model):
         SUSPENDED = 'SUSPENDED', _('Suspended')
     
     # Personal Information
-    driver_id = models.CharField(max_length=20, unique=True, db_index=True)
+    driver_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
@@ -109,3 +109,19 @@ class Driver(models.Model):
             return 100.0
         completed = self.trips.filter(status='COMPLETED').count()
         return round((completed / total_trips) * 100, 2)
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate driver_id if not provided"""
+        if not self.driver_id:
+            # Get the last driver
+            last_driver = Driver.objects.order_by('-id').first()
+            if last_driver and last_driver.driver_id.startswith('DRV-'):
+                try:
+                    last_number = int(last_driver.driver_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.driver_id = f'DRV-{new_number:06d}'
+        super().save(*args, **kwargs)

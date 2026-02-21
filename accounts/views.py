@@ -24,9 +24,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
     
     def get_permissions(self):
-        if self.action == 'create':
-            return [AllowAny()]
-        elif self.action in ['update', 'partial_update', 'destroy']:
+        """Admin-only for create/update/delete, authenticated for list/retrieve"""
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [IsAdminUser()]
         return [IsAuthenticated()]
     

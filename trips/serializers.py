@@ -49,6 +49,7 @@ class TripCreateSerializer(serializers.ModelSerializer):
             'scheduled_pickup_time', 'scheduled_delivery_time',
             'estimated_distance_km', 'notes'
         ]
+        read_only_fields = ['trip_id']
     
     def validate(self, data):
         """Validate trip creation business rules"""

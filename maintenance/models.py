@@ -23,7 +23,7 @@ class MaintenanceRecord(models.Model):
         CANCELLED = 'CANCELLED', _('Cancelled')
     
     # Record Information
-    record_id = models.CharField(max_length=20, unique=True, db_index=True)
+    record_id = models.CharField(max_length=20, unique=True, db_index=True, blank=True)
     vehicle = models.ForeignKey(
         'vehicles.Vehicle',
         on_delete=models.CASCADE,
@@ -108,3 +108,19 @@ class MaintenanceRecord(models.Model):
     def total_cost(self):
         """Calculate total maintenance cost"""
         return self.labor_cost + self.parts_cost
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate record_id if not provided"""
+        if not self.record_id:
+            # Get the last maintenance record
+            last_record = MaintenanceRecord.objects.order_by('-id').first()
+            if last_record and last_record.record_id.startswith('MNT-'):
+                try:
+                    last_number = int(last_record.record_id.split('-')[1])
+                    new_number = last_number + 1
+                except (IndexError, ValueError):
+                    new_number = 1
+            else:
+                new_number = 1
+            self.record_id = f'MNT-{new_number:06d}'
+        super().save(*args, **kwargs)

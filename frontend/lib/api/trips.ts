@@ -39,7 +39,7 @@ export const tripApi = {
   // Get all trips
   async getAll(params?: Record<string, any>) {
     const response = await apiClient.get('/trips/', { params });
-    return response.data;
+    return response.data.results || response.data;
   },
 
   // Get trip by ID

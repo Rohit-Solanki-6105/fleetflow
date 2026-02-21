@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     LayoutDashboard,
@@ -8,21 +9,34 @@ import {
     Wrench,
     Users,
     BarChart,
-    Settings
+    Settings,
+    DollarSign,
+    UserCog
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
     { name: 'Command Center', href: '/command-center', icon: LayoutDashboard },
     { name: 'Vehicles', href: '/vehicles', icon: Truck },
+    { name: 'Drivers', href: '/drivers', icon: Users },
     { name: 'Trips', href: '/trips', icon: Map },
     { name: 'Maintenance', href: '/maintenance', icon: Wrench },
-    { name: 'Drivers', href: '/drivers', icon: Users },
-    { name: 'Reports', href: '/reports', icon: BarChart },
+    { name: 'Expenses', href: '/expenses', icon: DollarSign },
+    { name: 'Analytics', href: '/analytics', icon: BarChart },
+    { name: 'Users', href: '/users', icon: UserCog, adminOnly: true },
 ];
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { user } = useAuth();
+
+    const filteredNavItems = navItems.filter(item => {
+        if (item.adminOnly && user?.role !== 'ADMIN') {
+            return false;
+        }
+        return true;
+    });
 
     return (
         <div className="flex h-full w-64 flex-col border-r bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
@@ -33,7 +47,7 @@ export function Sidebar() {
 
             <div className="flex-1 overflow-y-auto py-6 px-4">
                 <nav className="space-y-1">
-                    {navItems.map((item) => {
+                    {filteredNavItems.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                         return (
                             <Link

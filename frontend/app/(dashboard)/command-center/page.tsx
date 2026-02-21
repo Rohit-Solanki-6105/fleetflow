@@ -13,17 +13,37 @@ import {
 import { analyticsApi } from '@/lib/api/analytics';
 
 interface DashboardStats {
-    total_vehicles: number;
-    available_vehicles: number;
-    on_trip_vehicles: number;
-    in_shop_vehicles: number;
-    total_drivers: number;
-    available_drivers: number;
-    active_trips: number;
-    pending_trips: number;
-    completed_trips_today: number;
-    total_distance_today: number;
-    fleet_utilization_rate: number;
+    vehicles: {
+        total: number;
+        available: number;
+        on_trip: number;
+        in_shop: number;
+        utilization_rate: number;
+    };
+    drivers: {
+        total: number;
+        on_duty: number;
+        on_trip: number;
+        avg_safety_score: number;
+        expired_licenses: number;
+    };
+    trips: {
+        total: number;
+        active: number;
+        completed_today: number;
+        pending_cargo_tons: number;
+    };
+    maintenance: {
+        in_progress: number;
+        scheduled_this_week: number;
+        overdue: number;
+    };
+    financial: {
+        fuel_cost_30d: number;
+        maintenance_cost_30d: number;
+        other_cost_30d: number;
+        total_operational_cost_30d: number;
+    };
 }
 
 export default function CommandCenterPage() {
@@ -84,7 +104,7 @@ export default function CommandCenterPage() {
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Active Fleet</p>
                             <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                {stats.available_vehicles + stats.on_trip_vehicles}
+                                {stats.vehicles.available + stats.vehicles.on_trip}
                             </p>
                         </div>
                         <div className="rounded-md bg-blue-100 dark:bg-blue-900/30 p-2">
@@ -92,8 +112,8 @@ export default function CommandCenterPage() {
                         </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        <span className="font-medium">{stats.on_trip_vehicles} on trip</span>
-                        <span className="ml-2">{stats.available_vehicles} available</span>
+                        <span className="font-medium">{stats.vehicles.on_trip} on trip</span>
+                        <span className="ml-2">{stats.vehicles.available} available</span>
                     </p>
                 </div>
 
@@ -103,7 +123,7 @@ export default function CommandCenterPage() {
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Active Trips</p>
                             <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                {stats.active_trips}
+                                {stats.trips.active}
                             </p>
                         </div>
                         <div className="rounded-md bg-indigo-100 dark:bg-indigo-900/30 p-2">
@@ -111,7 +131,7 @@ export default function CommandCenterPage() {
                         </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        {stats.pending_trips} pending dispatch
+                        {stats.trips.total - stats.trips.active - stats.trips.completed_today} pending dispatch
                     </p>
                 </div>
 
@@ -121,7 +141,7 @@ export default function CommandCenterPage() {
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">In Shop</p>
                             <p className="mt-1 text-3xl font-semibold tracking-tight text-red-600 dark:text-red-500">
-                                {stats.in_shop_vehicles}
+                                {stats.vehicles.in_shop}
                             </p>
                         </div>
                         <div className="rounded-md bg-red-100 dark:bg-red-900/30 p-2">
@@ -139,7 +159,7 @@ export default function CommandCenterPage() {
                         <div>
                             <p className="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Utilization Rate</p>
                             <p className="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                                {stats.fleet_utilization_rate.toFixed(1)}%
+                                {stats.vehicles.utilization_rate?.toFixed(1) || '0.0'}%
                             </p>
                         </div>
                         <div className="rounded-md bg-emerald-100 dark:bg-emerald-900/30 p-2">
@@ -147,7 +167,7 @@ export default function CommandCenterPage() {
                         </div>
                     </div>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        {stats.completed_trips_today} trips completed today
+                        {stats.trips.completed_today} trips completed today
                     </p>
                 </div>
             </div>

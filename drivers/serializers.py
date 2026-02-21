@@ -62,6 +62,7 @@ class DriverCreateUpdateSerializer(serializers.ModelSerializer):
             'license_expiry_date', 'license_state', 'hire_date', 'status',
             'safety_score', 'notes', 'photo'
         ]
+        read_only_fields = ['driver_id']
     
     def validate_status(self, value):
         """Prevent status changes that violate business rules"""

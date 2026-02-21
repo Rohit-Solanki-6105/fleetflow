@@ -5,7 +5,7 @@ import { Plus, Search, Loader2, DollarSign, TrendingUp, X } from 'lucide-react';
 import { expensesApi, Expense } from '@/lib/api/expenses';
 import { vehicleApi } from '@/lib/api/vehicles';
 
-const EXPENSE_TYPES = ['FUEL', 'MAINTENANCE', 'INSURANCE', 'TOLLS', 'PARKING', 'OTHER'];
+const EXPENSE_TYPES = ['TOLL', 'PARKING', 'CLEANING', 'INSURANCE', 'REGISTRATION', 'FINE', 'TIRE_REPLACEMENT', 'ACCESSORIES', 'OTHER'];
 
 export default function ExpensesPage() {
     const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -15,10 +15,10 @@ export default function ExpensesPage() {
     const [typeFilter, setTypeFilter] = useState<string>('');
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
-        vehicle_id: '',
+        vehicle: 0,
         date: '',
         amount: 0,
-        expense_type: 'FUEL',
+        expense_type: 'OTHER',
         description: '',
     });
     const [formError, setFormError] = useState('');
@@ -44,18 +44,19 @@ export default function ExpensesPage() {
     };
 
     const filteredExpenses = expenses.filter(expense => {
+        const vehicleId = expense.vehicle_details?.vehicle_id || '';
         const matchesSearch = expense.expense_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            expense.vehicle_id?.toLowerCase().includes(searchTerm.toLowerCase());
+            vehicleId.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = !typeFilter || expense.expense_type === typeFilter;
         return matchesSearch && matchesType;
     });
 
     const handleAdd = () => {
         setFormData({
-            vehicle_id: '',
+            vehicle: 0,
             date: '',
             amount: 0,
-            expense_type: 'FUEL',
+            expense_type: 'OTHER',
             description: '',
         });
         setShowModal(true);
@@ -207,7 +208,7 @@ export default function ExpensesPage() {
                                         {expense.expense_id}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {expense.vehicle_id}
+                                        {expense.vehicle_details?.vehicle_id || expense.vehicle}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {expense.expense_type}
@@ -230,34 +231,37 @@ export default function ExpensesPage() {
 
             {/* Create Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-950 rounded-lg max-w-lg w-full p-6 border border-gray-200 dark:border-gray-800">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Log Expense</h2>
-                            <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-500">
-                                <X className="h-5 w-5" />
-                            </button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-950 rounded-lg max-w-lg w-full border border-gray-200 dark:border-gray-800 my-8 max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Log Expense</h2>
+                                <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-500">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
                         </div>
 
-                        {formError && (
-                            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                                <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>
-                            </div>
-                        )}
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {formError && (
+                                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                                    <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>
+                                </div>
+                            )}
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4" id="expenseForm">
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vehicle *</label>
                                 <select
                                     required
-                                    value={formData.vehicle_id}
-                                    onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
+                                    value={formData.vehicle}
+                                    onChange={(e) => setFormData({ ...formData, vehicle: parseInt(e.target.value) })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md dark:bg-gray-900 dark:text-gray-100"
                                 >
-                                    <option value="">Select Vehicle</option>
+                                    <option value="0">Select Vehicle</option>
                                     {vehicles.map(v => (
-                                        <option key={v.id} value={v.vehicle_id}>{v.vehicle_id} - {v.make} {v.model}</option>
+                                        <option key={v.id} value={v.id}>{v.vehicle_id} - {v.make} {v.model}</option>
                                     ))}
                                 </select>
                             </div>
@@ -309,8 +313,11 @@ export default function ExpensesPage() {
                                     placeholder="e.g., Regular fuel fill-up, Oil change, etc."
                                 />
                             </div>
+                            </form>
+                        </div>
 
-                            <div className="flex gap-3 pt-4">
+                        <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+                            <div className="flex gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
@@ -320,13 +327,14 @@ export default function ExpensesPage() {
                                 </button>
                                 <button
                                     type="submit"
+                                    form="expenseForm"
                                     disabled={submitting}
                                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-50"
                                 >
                                     {submitting ? 'Logging...' : 'Log Expense'}
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             )}
