@@ -1,0 +1,29 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+venv/
+ENV/
+db.sqlite3
+/static/
+/media/
+
+# --- Frontend (Node/React/Vue/etc.) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# --- Operating System ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
