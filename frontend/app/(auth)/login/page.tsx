@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Truck, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useAuth } from '@/contexts/AuthContext';
 
 const loginSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -15,8 +15,9 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { login } = useAuth();
 
     const {
         register,
@@ -27,11 +28,16 @@ export default function LoginPage() {
     });
 
     const onSubmit = async (data: LoginFormValues) => {
-        // Simulate API call to Django backend
-        console.log('Login payload:', data);
+        setIsLoading(true);
+        setError(null);
 
-        // Redirect to Command Center
-        router.push('/command-center');
+        try {
+            await login(data.email, data.password);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -110,6 +116,13 @@ export default function LoginPage() {
                             )}
                         </div>
                     </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="rounded-md bg-red-50 dark:bg-red-900/10 p-4">
+                            <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+                        </div>
+                    )}
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
