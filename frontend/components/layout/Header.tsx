@@ -3,7 +3,7 @@ import { Bell, Search, User } from 'lucide-react';
 export function Header() {
     return (
         <header className="flex h-16 w-full items-center justify-between border-b bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 px-6 box-border">
-            <div className="flex items-center flex-1">
+            {/* <div className="flex items-center flex-1">
                 <label htmlFor="search" className="sr-only">Search</label>
                 <div className="relative w-full max-w-md">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -17,7 +17,7 @@ export function Header() {
                         type="search"
                     />
                 </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center space-x-4">
                 <button
