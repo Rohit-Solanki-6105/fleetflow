@@ -8,17 +8,19 @@ import {
     Wrench,
     Users,
     BarChart,
-    Settings
+    Settings,
+    Receipt
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
     { name: 'Command Center', href: '/command-center', icon: LayoutDashboard },
     { name: 'Vehicles', href: '/vehicles', icon: Truck },
+    { name: 'Drivers', href: '/drivers', icon: Users },
     { name: 'Trips', href: '/trips', icon: Map },
     { name: 'Maintenance', href: '/maintenance', icon: Wrench },
-    { name: 'Drivers', href: '/drivers', icon: Users },
-    { name: 'Reports', href: '/reports', icon: BarChart },
+    { name: 'Expenses', href: '/expenses', icon: Receipt },
+    { name: 'Analytics', href: '/analytics', icon: BarChart },
 ];
 
 export function Sidebar() {

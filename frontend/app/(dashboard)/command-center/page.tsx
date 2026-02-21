@@ -8,9 +8,11 @@ import {
     TrendingUp,
     Activity,
     Wrench,
-    Loader2
+    Loader2,
+    RefreshCw
 } from 'lucide-react';
 import { analyticsApi } from '@/lib/api/analytics';
+import { useRealtime } from '@/lib/hooks/useRealtime';
 
 interface DashboardStats {
     total_vehicles: number;
@@ -27,25 +29,11 @@ interface DashboardStats {
 }
 
 export default function CommandCenterPage() {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                setLoading(true);
-                const data = await analyticsApi.getDashboard();
-                setStats(data);
-            } catch (err: any) {
-                setError(err.message || 'Failed to load dashboard data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboard();
-    }, []);
+    // Use real-time updates every 10 seconds
+    const { data: stats, loading, error, lastUpdate, refresh } = useRealtime<DashboardStats>(
+        () => analyticsApi.getDashboard(),
+        { interval: 10000, enabled: true }
+    );
 
     if (loading) {
         return (
@@ -69,11 +57,26 @@ export default function CommandCenterPage() {
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
-            <div>
-                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Command Center</h1>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Real-time overview of fleet operations and logistics.
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Command Center</h1>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Real-time overview of fleet operations and logistics.
+                        {lastUpdate && (
+                            <span className="ml-2">
+                                • Last updated: {lastUpdate.toLocaleTimeString()}
+                            </span>
+                        )}
+                    </p>
+                </div>
+                <button
+                    onClick={refresh}
+                    disabled={loading}
+                    className="inline-flex items-center gap-x-1.5 rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                </button>
             </div>
 
             {/* KPI Stats Row */}

@@ -154,7 +154,7 @@ export default function VehiclesPage() {
                                                 {vehicle.year}
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                                {vehicle.cargo_capacity.toLocaleString()}
+                                                {vehicle.max_capacity_kg.toLocaleString()}
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm">
                                                 <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${getStatusColor(vehicle.status)}`}>
@@ -165,7 +165,7 @@ export default function VehiclesPage() {
                                                 <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                                                     <MoreVertical className="h-5 w-5" />
                                                 </button>
-            )}                          </td>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -173,7 +173,8 @@ export default function VehiclesPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
+            )}
         </div>
     );
 }
